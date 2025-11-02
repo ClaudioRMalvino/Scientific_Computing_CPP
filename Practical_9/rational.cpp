@@ -50,99 +50,70 @@ public:
   Rational(int num, int denom) : m_numer{num}, m_denom{denom} {}
 
   Rational &operator+=(const int &num) {
-    if ((num % m_denom) == 0) {
-      m_numer += (num / m_denom);
-    } else {
-      m_numer += num * m_denom;
-    }
+    int newNum = num * m_denom;
+    m_numer = m_numer + newNum;
+    reduce();
+    return *this;
   }
 
   Rational &operator+=(const Rational &other) {
-    int otherNumer = other.m_numer;
-    int otherDenom = other.m_denom;
-
-    if (m_denom != otherDenom) {
-      int lcm = lowestCM(m_denom, otherDenom);
+    if (m_denom != other.m_denom) {
+      int lcm = lowestCM(m_denom, other.m_denom);
       m_numer *= (lcm / m_denom);
       m_denom = lcm;
-      m_numer += otherNumer * (lcm / otherDenom)
+      m_numer += other.m_numer * (lcm / other.m_denom);
+    } else {
+      m_numer += other.m_numer;
+    }
+    reduce();
+    return *this;
+  }
+
+  Rational &operator-=(const int &num) {
+    int newNum = num * m_denom;
+    m_numer = m_numer - newNum;
+    reduce();
+    return *this;
+  }
+
+  Rational &operator-=(const Rational &other) {
+
+    if (m_denom != other.m_denom) {
+      int lcm = lowestCM(m_denom, other.m_denom);
+      m_numer *= (lcm / m_denom);
+      m_denom = lcm;
+      m_numer -= other.m_numer * (lcm / other.m_denom);
     }
 
     reduce();
     return *this;
   }
 
-  Rational &operator-=(const int &num) {
-    if ((num % m_denom) == 0) {
-      m_numer -= (num / m_denom);
-    } else {
-      m_numer -= num * m_denom;
-    }
-  }
-
-  Rational &operator-=(const Rational &other) {
-    int otherNumer = other.m_numer;
-    int otherDenom = other.m_denom;
-
-    if (m_denom != otherDenom) {
-      int gcf = euclidGCF(m_denom, otherDenom);
-      if (gcf == m_denom) {
-        m_numer *= gcf;
-        m_denom *= gcf;
-        m_numer -= otherNumer;
-      }
-      if (gcf == otherDenom) {
-        otherNumer *= gcf;
-        m_numer -= otherNumer;
-      }
-
-      m_numer *= gcf;
-      m_denom *= gcf;
-      otherNumer *= gcf;
-      m_numer -= otherNumer;
-    }
-  }
   Rational &operator*=(const Rational &other) {
-    if ((other.m_numer % m_denom) == 0) {
-      int reducedNum = other.m_numer / m_denom;
-      m_numer *= reducedNum;
-    } else {
-      m_numer *= other.m_numer;
-    }
-    if (m_numer % other.m_denom == 0) {
-      m_numer /= other.m_denom;
-    } else {
-      m_denom *= other.m_denom;
-    }
+    m_numer = m_numer * other.m_numer;
+    m_denom = m_denom * other.m_numer;
+    reduce();
+    return *this;
   }
 
   Rational &operator*=(const int &num) {
-    if ((num % m_denom) == 0) {
-      m_numer *= (num / m_denom);
-    } else {
-      m_numer *= num;
-    }
+    m_numer = m_numer * num;
+    reduce();
+    return *this;
   }
 
   Rational &operator/=(const int &num) {
-    if (m_numer % num != 0) {
-      m_denom *= num;
-    }
-    m_numer = m_numer / num;
+    m_denom = m_denom * num;
+    reduce();
+    return *this;
   }
+
   Rational &operator/=(const Rational &other) {
-    int numer = other.m_denom;
-    int denom = other.m_numer;
-
-    if ((numer % m_denom) == 0) {
-      m_numer *= numer / m_denom;
-    }
-    if ((m_numer % denom) == 0) {
-      m_numer /= denom;
-    }
-
-    m_numer *= numer;
-    m_denom *= denom;
+    m_numer *= other.m_denom;
+    m_denom *= other.m_numer;
+    ;
+    reduce();
+    return *this;
   }
 
   friend Rational operator+(const Rational &frac1, const Rational &frac2);
@@ -152,25 +123,59 @@ public:
 };
 
 Rational operator+(const Rational &frac1, const Rational &frac2) {
-  Rational result;
+  Rational result{0, 0};
   Rational fracA = frac1;
   Rational fracB = frac2;
 
-  if (fracA.m_denom != fracB.m_denom) {
-    int gcf = Rational::euclidGCF(fracA.m_denom, fracB.m_denom);
-    if (gcf == fracA.m_denom) {
-      fracA.m_numer *= gcf;
-      fracA.m_denom *= gcf;
-      fracA.m_numer += fracB.m_numer;
-    }
-    if (gcf == fracB.m_denom) {
-      fracB.m_numer *= gcf;
-      fracA.m_numer += fracB.m_numer;
-    }
-
-    fracA.m_numer *= gcf;
-    fracA.m_denom *= gcf;
-    fracB.m_numer *= gcf;
-    fracA.m_numer += fracB.m_numer;
+  if (frac1.m_denom != frac2.m_denom) {
+    int lcm = Rational::lowestCM(fracA.m_denom, fracB.m_denom);
+    fracA.m_numer *= lcm / fracA.m_denom;
+    fracB.m_numer *= lcm / fracB.m_denom;
+    result.m_numer = fracA.m_numer + fracB.m_numer;
+    result.m_denom = lcm;
+  } else {
+    result.m_numer = fracA.m_numer + fracB.m_numer;
+    result.m_denom = fracA.m_denom;
   }
+  result.reduce();
+  return result;
+}
+
+Rational operator-(const Rational &frac1, const Rational &frac2) {
+  Rational result{0, 0};
+  Rational fracA = frac1;
+  Rational fracB = frac2;
+
+  if (frac1.m_denom != frac2.m_denom) {
+    int lcm = Rational::lowestCM(fracA.m_denom, fracB.m_denom);
+    fracA.m_numer *= lcm / fracA.m_denom;
+    fracB.m_numer *= lcm / fracB.m_denom;
+    result.m_numer = fracA.m_numer - fracB.m_numer;
+    result.m_denom = lcm;
+  } else {
+    result.m_numer = fracA.m_numer - fracB.m_numer;
+    result.m_denom = fracA.m_denom;
+  }
+  result.reduce();
+  return result;
+}
+
+Rational operator*(const Rational &frac1, const Rational &frac2) {
+  Rational result{1, 1};
+
+  result.m_numer = frac1.m_numer * frac2.m_numer;
+  result.m_denom = frac1.m_denom * frac2.m_denom;
+
+  result.reduce();
+  return result;
+}
+
+Rational operator/(const Rational &frac1, const Rational &frac2) {
+  Rational result{1, 1};
+
+  result.m_numer = frac1.m_numer * frac2.m_denom;
+  result.m_denom = frac1.m_denom * frac2.m_numer;
+
+  result.reduce();
+  return result;
 }
