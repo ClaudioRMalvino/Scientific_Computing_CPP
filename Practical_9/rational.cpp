@@ -1,9 +1,11 @@
 #include <algorithm>
+#include <ostream>
+#include <stdexcept>
 
 class Rational {
 private:
-  int m_numer{0};
-  int m_denom{0};
+  int m_numer;
+  int m_denom;
 
   void reduce() {
     int gcf = euclidGCF(m_numer, m_denom);
@@ -14,6 +16,10 @@ private:
       m_numer = -m_numer;
       m_denom = -m_denom;
     }
+  }
+  double value() {
+    double val = static_cast<double>(m_numer) / static_cast<double>(m_denom);
+    return val;
   }
 
   static int euclidGCF(int num1, int num2) {
@@ -47,7 +53,13 @@ private:
   }
 
 public:
-  Rational(int num, int denom) : m_numer{num}, m_denom{denom} {}
+  Rational(int num, int denom) : m_numer{num}, m_denom{denom} {
+    if (denom == 0) {
+      throw std::invalid_argument("Denominator cannot be 0.");
+    }
+    reduce();
+  }
+  Rational() {};
 
   Rational &operator+=(const int &num) {
     int newNum = num * m_denom;
@@ -120,10 +132,12 @@ public:
   friend Rational operator-(const Rational &frac1, const Rational &frac2);
   friend Rational operator*(const Rational &frac1, const Rational &frac2);
   friend Rational operator/(const Rational &frac1, const Rational &frac2);
+  friend std::ostream &operator<<(std::ostream &os, const Rational &r);
+  friend std::ostream &operator<<(std::ostream &os, Rational &r);
 };
 
 Rational operator+(const Rational &frac1, const Rational &frac2) {
-  Rational result{0, 0};
+  Rational result;
   Rational fracA = frac1;
   Rational fracB = frac2;
 
@@ -142,7 +156,7 @@ Rational operator+(const Rational &frac1, const Rational &frac2) {
 }
 
 Rational operator-(const Rational &frac1, const Rational &frac2) {
-  Rational result{0, 0};
+  Rational result;
   Rational fracA = frac1;
   Rational fracB = frac2;
 
@@ -161,7 +175,7 @@ Rational operator-(const Rational &frac1, const Rational &frac2) {
 }
 
 Rational operator*(const Rational &frac1, const Rational &frac2) {
-  Rational result{1, 1};
+  Rational result;
 
   result.m_numer = frac1.m_numer * frac2.m_numer;
   result.m_denom = frac1.m_denom * frac2.m_denom;
@@ -171,11 +185,31 @@ Rational operator*(const Rational &frac1, const Rational &frac2) {
 }
 
 Rational operator/(const Rational &frac1, const Rational &frac2) {
-  Rational result{1, 1};
+  Rational result;
 
   result.m_numer = frac1.m_numer * frac2.m_denom;
   result.m_denom = frac1.m_denom * frac2.m_numer;
 
   result.reduce();
   return result;
+}
+
+std::ostream &operator<<(std::ostream &os, const Rational &r) {
+  os << r.m_numer << "/" << r.m_denom << std::endl;
+  return os;
+}
+
+std::istream &operator>>(std::istream &is, Rational &r) {
+  int numer;
+  char slash;
+  int denom;
+
+  if (is >> numer >> slash >> denom) {
+    if (slash == '/' && denom != 0) {
+      r = {numer, denom};
+    } else {
+      is.setstate(std::ios::failbit);
+    }
+  }
+  return is;
 }
