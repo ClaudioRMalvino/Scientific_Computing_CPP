@@ -29,6 +29,7 @@ double userMaxT() {
   std::cout << std::endl;
   return maxT;
 }
+
 double userDeltaT() {
   std::cout << "Input time-step size: ";
   double deltaT;
