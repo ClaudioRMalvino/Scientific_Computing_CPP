@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <iostream>
+#include <istream>
 #include <ostream>
 #include <stdexcept>
 
@@ -22,15 +24,17 @@ private:
     return val;
   }
 
-  static int euclidGCF(int num1, int num2) {
+  static int euclidGCF(const int &num1, const int &num2) {
     int biggerNum{0};
     int smallerNum{0};
     int gcf{0};
 
     if (num1 > num2) {
       biggerNum = num1;
+      smallerNum = num2;
     } else {
       biggerNum = num2;
+      smallerNum = num1;
     }
 
     int remainder = biggerNum % smallerNum;
@@ -44,7 +48,6 @@ private:
       gcf = remainder;
       remainder = biggerNum % smallerNum;
     }
-
     return gcf;
   }
 
@@ -133,7 +136,7 @@ public:
   friend Rational operator*(const Rational &frac1, const Rational &frac2);
   friend Rational operator/(const Rational &frac1, const Rational &frac2);
   friend std::ostream &operator<<(std::ostream &os, const Rational &r);
-  friend std::ostream &operator<<(std::ostream &os, Rational &r);
+  friend std::istream &operator>>(std::ostream &os, Rational &r);
 };
 
 Rational operator+(const Rational &frac1, const Rational &frac2) {
@@ -209,6 +212,7 @@ std::istream &operator>>(std::istream &is, Rational &r) {
       r = {numer, denom};
     } else {
       is.setstate(std::ios::failbit);
+      throw std::invalid_argument("Input must be A/B, where B != 0");
     }
   }
   return is;
