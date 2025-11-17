@@ -1,4 +1,4 @@
-# Scientific Computing in C++
+# Scientific Programming in C++
 
 This repository contains practical exercises and projects for the "Scientific Programming in C++" course. The code demonstrates a progressive journey through C++, from fundamental syntax to more advanced concepts like object-oriented programming, templates, and memory management.
 
@@ -12,7 +12,7 @@ Students should leave the course knowing:
 * Performance characteristics of data structures.
 
 *(Note: Course description from the official course syllabus.)*
-`[Link to official course description](https://www.your-university.edu/path/to/course)`
+`[Link to official course description](https://mphil.csc.cam.ac.uk/current-students/lectures-supported-by-the-mphil/scientific-programming-in-c/)`
 
 ---
 
